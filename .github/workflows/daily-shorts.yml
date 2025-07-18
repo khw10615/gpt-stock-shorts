@@ -23,10 +23,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install openai yfinance matplotlib ffmpeg-python python-dotenv requests google-auth-oauthlib google-api-python-client
       - name: Run script
-        env:
+    env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ELEVEN_API_KEY: ${{ secrets.ELEVEN_API_KEY }}
-          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_ID:   ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
-        run: python prototype.py
+        run: |
+          python - << "PY"
+          import os, requests, json
+          print("▼ TTS 연결 테스트")
+          r = requests.get(
+              "https://api.elevenlabs.io/v1/voices",
+              headers={"xi-api-key": os.getenv("ELEVEN_API_KEY")},
+              timeout=30
+          )
+          print("HTTP Status:", r.status_code)
+          print("Content‑Type:", r.headers.get("Content-Type"))
+          if r.status_code != 200:
+              print(r.text[:300])
+          PY
+          python prototype.py
